@@ -110,7 +110,7 @@ my $contact_Header = $gen->contact([base2   =>  "http://inspire.ec.europa.eu/sch
                                     $gen->spelling      ([gn      =>  "urn:x-inspire:specification:gmlas:GeographicalNames:3.0"],
                                         $gen->SpellingOfName([gn      =>  "urn:x-inspire:specification:gmlas:GeographicalNames:3.0"],
                                             $gen->text      ([gn      =>  "urn:x-inspire:specification:gmlas:GeographicalNames:3.0"], $dataHeader{address}),
-                                            $gen->script    ([gn      =>  "urn:x-inspire:specification:gmlas:GeographicalNames:3.0"], 'Latin')
+                                            $gen->script    ([gn      =>  "urn:x-inspire:specification:gmlas:GeographicalNames:3.0"], 'Latn')
                                         )
                                     )
                                 )
@@ -128,18 +128,18 @@ my $contact_Header = $gen->contact([base2   =>  "http://inspire.ec.europa.eu/sch
 my $reportingAuthority_Header = $gen->reportingAuthority([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"],
                                     $gen->RelatedParty([base2   =>  "http://inspire.ec.europa.eu/schemas/base2/1.0"],
                                         $gen->individualName([base2   =>  "http://inspire.ec.europa.eu/schemas/base2/1.0"],
-                                            $gen->PT_FreeText([gmd     =>  "http://www.isotc211.org/2005/gmd"],
-                                                $gen->textGroup([gmd     =>  "http://www.isotc211.org/2005/gmd"],
+                                            # $gen->PT_FreeText([gmd     =>  "http://www.isotc211.org/2005/gmd"],
+                                                # $gen->textGroup([gmd     =>  "http://www.isotc211.org/2005/gmd"],
                                                     $gen->LocalisedCharacterString([gmd     =>  "http://www.isotc211.org/2005/gmd"], $dataHeader{responsibleParty})
-                                                )
-                                            )
+                                                # )
+                                            # )
                                         ),
                                         $gen->organisationName([base2   =>  "http://inspire.ec.europa.eu/schemas/base2/1.0"],
-                                            $gen->PT_FreeText([gmd     =>  "http://www.isotc211.org/2005/gmd"],
-                                                $gen->textGroup([gmd     =>  "http://www.isotc211.org/2005/gmd"],
+                                            # $gen->PT_FreeText([gmd     =>  "http://www.isotc211.org/2005/gmd"],
+                                                # $gen->textGroup([gmd     =>  "http://www.isotc211.org/2005/gmd"],
                                                     $gen->LocalisedCharacterString([gmd     =>  "http://www.isotc211.org/2005/gmd"], $dataHeader{organisationName})
-                                                )
-                                            )
+                                                # )
+                                            # )
                                         ),
                                         $contact_Header
                                     )
@@ -268,7 +268,7 @@ foreach my $key (sort { $a <=> $b } keys %networks){
                                         $gen->spelling      ([gn      =>  "urn:x-inspire:specification:gmlas:GeographicalNames:3.0"],
                                             $gen->SpellingOfName([gn      =>  "urn:x-inspire:specification:gmlas:GeographicalNames:3.0"],
                                                 $gen->text      ([gn      =>  "urn:x-inspire:specification:gmlas:GeographicalNames:3.0"], $network{address}),
-                                                $gen->script    ([gn      =>  "urn:x-inspire:specification:gmlas:GeographicalNames:3.0"], 'Latin')
+                                                $gen->script    ([gn      =>  "urn:x-inspire:specification:gmlas:GeographicalNames:3.0"], 'Latn')
                                             )
                                         )
                                     )
@@ -286,18 +286,18 @@ foreach my $key (sort { $a <=> $b } keys %networks){
     my $responsibleParty = $gen->responsibleParty([ef      =>  "http://inspire.ec.europa.eu/schemas/ef/3.0"],
                                 $gen->RelatedParty([base2   =>  "http://inspire.ec.europa.eu/schemas/base2/1.0"],
                                     $gen->individualName([base2   =>  "http://inspire.ec.europa.eu/schemas/base2/1.0"],
-                                        $gen->PT_FreeText([gmd     =>  "http://www.isotc211.org/2005/gmd"],
-                                            $gen->textGroup([gmd     =>  "http://www.isotc211.org/2005/gmd"],
+                                        # $gen->PT_FreeText([gmd     =>  "http://www.isotc211.org/2005/gmd"],
+                                            # $gen->textGroup([gmd     =>  "http://www.isotc211.org/2005/gmd"],
                                                 $gen->LocalisedCharacterString([gmd     =>  "http://www.isotc211.org/2005/gmd"], $network{responsibleParty})
-                                            )
-                                        )
+                                            # )
+                                        # )
                                     ),
                                     $gen->organisationName([base2   =>  "http://inspire.ec.europa.eu/schemas/base2/1.0"],
-                                        $gen->PT_FreeText([gmd     =>  "http://www.isotc211.org/2005/gmd"],
-                                            $gen->textGroup([gmd     =>  "http://www.isotc211.org/2005/gmd"],
+                                        # $gen->PT_FreeText([gmd     =>  "http://www.isotc211.org/2005/gmd"],
+                                            # $gen->textGroup([gmd     =>  "http://www.isotc211.org/2005/gmd"],
                                                 $gen->LocalisedCharacterString([gmd     =>  "http://www.isotc211.org/2005/gmd"], $network{organisationName})
-                                            )
-                                        )
+                                            # )
+                                        # )
                                     ),
                                     $contact
                                 )
@@ -708,8 +708,8 @@ foreach my $key (sort { $a <=> $b } keys %networks){
                 my $environmentalObjective_feature = $gen->environmentalObjective([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"],
                                                         $gen->EnvironmentalObjective([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"],
                                                             $gen->objectiveType([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"], {'xlink:href' => 'http://dd.eionet.europa.eu/vocabulary/aq/objectivetype/'.$environmentalObjective{objectiveType}}),
-                                                            $gen->reportingMetric([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"], {'xlink:href' => 'http://dd.eionet.europa.eu/vocabulary/aq/reportingmetric/'.$environmentalObjective{reportingMetric}.'/'}),
-                                                            $gen->protectionTarget([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"], {'xlink:href' => 'http://dd.eionet.europa.eu/vocabulary/aq/protectiontarget/'.$environmentalObjective{protectionTarget}.'/'})
+                                                            $gen->reportingMetric([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"], {'xlink:href' => 'http://dd.eionet.europa.eu/vocabulary/aq/reportingmetric/'.$environmentalObjective{reportingMetric}}),
+                                                            $gen->protectionTarget([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"], {'xlink:href' => 'http://dd.eionet.europa.eu/vocabulary/aq/protectiontarget/'.$environmentalObjective{protectionTarget}})
                                                         )
                                                     );
 
@@ -738,8 +738,8 @@ foreach my $key (sort { $a <=> $b } keys %networks){
                                             defined $samplingPoint{distanceSource} ? $gen->distanceSource([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"], {'uom' => "http://dd.eionet.europa.eu/vocabulary/uom/length/m"}, sprintf("%.1f", $samplingPoint{distanceSource})) : undef,
                                             # <aqd:industrialEmissions uom="t/year">-9999.0</aqd:industrialEmissions>
                                             ($samplingPoint{stationClassification} eq 'industrial') ? $gen->industrialEmissions([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"], {'uom' => 'http://dd.eionet.europa.eu/vocabulary/uom/emission/t.year-1'}, '-9999.0') : undef,
-                                            defined $samplingPoint{mainEmissionSources} ? $gen->mainEmissionSources([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"], {'xlink:href' => "http://dd.eionet.europa.eu/vocabulary/aq/emissionsource/".$samplingPoint{mainEmissionSources}."/"}) : undef,
-                                            defined $samplingPoint{stationClassification} ? $gen->stationClassification([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"], {'xlink:href' => "http://dd.eionet.europa.eu/vocabulary/aq/stationclassification/".$samplingPoint{stationClassification} ."/"}) : undef
+                                            defined $samplingPoint{mainEmissionSources} ? $gen->mainEmissionSources([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"], {'xlink:href' => "http://dd.eionet.europa.eu/vocabulary/aq/emissionsource/".$samplingPoint{mainEmissionSources}}) : undef,
+                                            defined $samplingPoint{stationClassification} ? $gen->stationClassification([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"], {'xlink:href' => "http://dd.eionet.europa.eu/vocabulary/aq/stationclassification/".$samplingPoint{stationClassification}}) : undef
                                         )
                                     ),
                                     $gen->usedAQD([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"], $samplingPoint{usedAQD}),
@@ -850,7 +850,25 @@ foreach my $key (sort { $a <=> $b } keys %networks){
                                     {'gml:id' => "SPP.".$formatted_code},
                                     $inspireId_feauture_SPP,
                                     $gen->type([ompr    =>  "http://inspire.ec.europa.eu/schemas/ompr/2.0"], 'Ambient air quality measurement instrument configuration'),
-                                    $gen->responsibleParty([ompr    =>  "http://inspire.ec.europa.eu/schemas/ompr/2.0"], {'xsi:nil' => "true"}),
+                                    $gen->responsibleParty([ompr    =>  "http://inspire.ec.europa.eu/schemas/ompr/2.0"],
+                                        $gen->RelatedParty([base2   =>  "http://inspire.ec.europa.eu/schemas/base2/1.0"],
+                                            $gen->individualName([base2   =>  "http://inspire.ec.europa.eu/schemas/base2/1.0"],
+                                                # $gen->PT_FreeText([gmd     =>  "http://www.isotc211.org/2005/gmd"],
+                                                    # $gen->textGroup([gmd     =>  "http://www.isotc211.org/2005/gmd"],
+                                                        $gen->LocalisedCharacterString([gmd     =>  "http://www.isotc211.org/2005/gmd"], $network{responsibleParty})
+                                                    # )
+                                                # )
+                                            ),
+                                            $gen->organisationName([base2   =>  "http://inspire.ec.europa.eu/schemas/base2/1.0"],
+                                                # $gen->PT_FreeText([gmd     =>  "http://www.isotc211.org/2005/gmd"],
+                                                    # $gen->textGroup([gmd     =>  "http://www.isotc211.org/2005/gmd"],
+                                                        $gen->LocalisedCharacterString([gmd     =>  "http://www.isotc211.org/2005/gmd"], $network{organisationName})
+                                                    # )
+                                                # )
+                                            ),
+                                            $contact
+                                        )
+                                    ),
                                     $gen->measurementType([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"], {'xlink:href' => "http://dd.eionet.europa.eu/vocabulary/aq/measurementtype/".$samplingPoint{measurementType}}),
                                     # $measurementMethod_SPP,
                                     # $measurementEquipment_SPP,

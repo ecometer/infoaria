@@ -1,3 +1,17 @@
+#!/usr/bin/perl
+# ----------------------_-------------------------------------------
+#  ___ __ ___ _ __  ___| |_ ___ _ _
+# / -_) _/ _ \ '  \/ -_)  _/ -_) '_|
+# \___\__\___/_|_|_\___|\__\___|_|   s.n.c.
+#
+#  Script     : params_config.pl
+#  Author     : Paolo Saudin & Hillary Martello
+#  Date       : 2018-03-28
+#  Last Edited: 2018-05-31
+#  Description: Script to generate ARE codes for dataset C and G
+#  Location   : Arpa vda
+# ------------------------------------------------------------------
+
 use Modern::Perl '2017';
 use XML::Generator;
 use IO::File;

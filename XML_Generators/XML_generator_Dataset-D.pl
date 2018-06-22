@@ -7,7 +7,7 @@
 #  Script     : XML_generator_Dataset-D.pl
 #  Author     : Paolo Saudin & Hillary Martello
 #  Date       : 2018-03-28
-#  Last Edited: 2018-06-01
+#  Last Edited: 2018-06-07
 #  Description: Create XML elements for dataset D
 #  Location   : Arpa vda
 # ------------------------------------------------------------------
@@ -24,21 +24,41 @@ use JSON;
 use Date::Calc qw(Today_and_Now);
 use DateTime;
 
-# absolute path
-my $abs_path = dirname(rel2abs($0));
+print ("\n-- -------------------------------------------------\n");
+print ("Acquisizione dati da file config\n");
 
 our %dataHeader;
 our %networks;
 
+# absolute path
+my $abs_path = dirname(rel2abs($0));
 # load library
-require "$abs_path/params.pl";
-print ("\n-- -------------------------------------------------\n");
-print ("Acquisizione dati da file config\n");
+require "$abs_path/CAU_params.pl";
+require "$abs_path/NET_params.pl";
+
+
+# DEFINIZIONE VARIABILI LOCALI
+###########################################################################
+my $dataset = 'D';
+my $version_year = '2017';
+# 02 Valle d'Aosta
+# 07 Liguria
+my $istat_code = '02';
+
+# Il versionID può essere:
+# - la data di quando i dati sono stati forniti o aggiornati;
+# - codice {purpose}-{year}-{version} con purpose che può essere "retro" se riferito all'anno precedente altrimenti "prelim"
+
+# my $today_versionID = DateTime->today()->stringify().'+01:00';
+my $today_versionID = 'retro-'.$version_year.'-v1';
+# my $today_versionID = 'prelim-'.$version_year.'-v1';
+
 
 # <codice dataset>_<codice istat regione>_<anno reporting>_<yyyymmddhhMMss>.xml
 # G_07_2017_20180109101530.xml
-# 02 Valle d'Aosta
+
 # Recupera data & ora
+
 my ($year,$month,$day, $hour,$min,$sec) = Today_and_Now();
 $month = sprintf "%02d", $month;
 $day   = sprintf "%02d", $day;
@@ -46,7 +66,7 @@ $hour  = sprintf "%02d", $hour;
 $min   = sprintf "%02d", $min;
 $sec   = sprintf "%02d", $sec;
 # Crea nome file
-my $filename = "D_02_".$year."_".$year.$month.$day.$hour.$min.$sec.".xml";
+my $filename = $dataset."_".$istat_code."_".$version_year."_".$year.$month.$day.$hour.$min.$sec.".xml";
 #my $filename = "output_datasetD.xml";
 
 # Apre stream
@@ -81,7 +101,8 @@ my $gen = XML::Generator->new(
             version     => '1.0',
             enconding   => 'UTF-8');
 
-my $today_versionID = DateTime->today()->stringify().'+01:00';
+
+
 # ##########################################################################
 # CREAZIONE ELEMENTI REPORTING HEADER
 
@@ -90,9 +111,9 @@ $guid = lc $guid->as_string;
 
 my $inspireId_Header =  $gen->inspireId([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"],
                             $gen->Identifier    ([base    =>  "http://inspire.ec.europa.eu/schemas/base/3.3"],
-                                $gen->localId   ([base    =>  "http://inspire.ec.europa.eu/schemas/base/3.3"], 'RHE.IT.Dataset.D.2018'),
+                                $gen->localId   ([base    =>  "http://inspire.ec.europa.eu/schemas/base/3.3"], 'RHE.IT.Dataset.D.'.$version_year),
                                 $gen->namespace ([base    =>  "http://inspire.ec.europa.eu/schemas/base/3.3"],'IT.ISPRA.AQD'),
-                                $gen->versionId ([base    =>  "http://inspire.ec.europa.eu/schemas/base/3.3"], $dataHeader{versionId})
+                                $gen->versionId ([base    =>  "http://inspire.ec.europa.eu/schemas/base/3.3"], $dataset." ".$dataHeader{versionId}." ".$version_year)
                             )
                         );
 
@@ -151,8 +172,8 @@ $guid = lc $guid->as_string;
 my $reportingPeriod_Header = $gen->reportingPeriod([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"],
                             $gen->TimePeriod(
                                 {'gml:id' => 'RHE.TP.'.$guid},
-                                $gen->beginPosition($dataHeader{beginPosition}),
-                                $gen->endPosition($dataHeader{endPosition})
+                                $gen->beginPosition($version_year."-".$dataHeader{beginPosition}),
+                                $gen->endPosition($version_year."-".$dataHeader{endPosition})
                             )
                         );
 # ##########################################################################
@@ -411,12 +432,33 @@ foreach my $key (sort { $a <=> $b } keys %networks){
                                                 )
                                             )
                                         );
-        my $dispersionSituation = $gen->dispersionSituation([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"],
+        my $dispersionSituation;
+        my $heavy_dutyFraction = 'heavy-dutyFraction';
+
+        if( defined $station{traffic} ){
+            $dispersionSituation = $gen->dispersionSituation([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"],
+                                    $gen->DispersionSituation([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"],
+                                        defined $station{dispersionSituation}{dispersionLocal} ? $gen->dispersionLocal([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"], {'xlink:href' => 'http://dd.eionet.europa.eu/vocabulary/aq/dispersionlocal/'.$station{dispersionSituation}{dispersionLocal}}) : undef,
+                                        defined $station{dispersionSituation}{dispersionRegional} ? $gen->dispersionRegional([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"], {'xlink:href' => 'http://dd.eionet.europa.eu/vocabulary/aq/dispersionregional/'.$station{dispersionSituation}{dispersionRegional}}) : undef,
+                                        defined $station{traffic}{distanceJunction} ? $gen->distanceJunction([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"], {"uom" => "http://dd.eionet.europa.eu/vocabulary/uom/length/m"}, $station{traffic}{distanceJunction}) : undef,
+                                        defined $station{traffic}{trafficVolume} ? $gen->trafficVolume([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"], $station{traffic}{trafficVolume}) : undef,
+                                        defined $station{traffic}{heavy_dutyFraction} ? $gen->$heavy_dutyFraction([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"], $station{traffic}{heavy_dutyFraction}) : undef,
+                                        defined $station{traffic}{trafficSpeed} ? $gen->trafficSpeed([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"], {"uom" => "http://dd.eionet.europa.eu/vocabulary/uom/velocity/km.h-1"}, $station{traffic}{trafficSpeed}) : undef,
+                                        defined $station{traffic}{streetWidth} ? $gen->streetWidth([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"], {"uom" => "http://dd.eionet.europa.eu/vocabulary/uom/length/m"}, $station{traffic}{streetWidth}) : undef,
+                                        defined $station{traffic}{heightFacades} ? $gen->heightFacades([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"], {"uom" => "http://dd.eionet.europa.eu/vocabulary/uom/length/m"}, $station{traffic}{heightFacades}) : undef
+                                    )
+                                );
+        }
+        else{
+            $dispersionSituation = $gen->dispersionSituation([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"],
                                     $gen->DispersionSituation([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"],
                                         defined $station{dispersionSituation}{dispersionLocal} ? $gen->dispersionLocal([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"], {'xlink:href' => 'http://dd.eionet.europa.eu/vocabulary/aq/dispersionlocal/'.$station{dispersionSituation}{dispersionLocal}}) : undef,
                                         defined $station{dispersionSituation}{dispersionRegional} ? $gen->dispersionRegional([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"], {'xlink:href' => 'http://dd.eionet.europa.eu/vocabulary/aq/dispersionregional/'.$station{dispersionSituation}{dispersionRegional}}) : undef
                                     )
                                 );
+
+        }
+
 
         if( defined $station{meteoParams}){
 
@@ -623,7 +665,14 @@ foreach my $key (sort { $a <=> $b } keys %networks){
                             )
                         );
 
-        # @Test
+        my $temp_buildingDist = undef;
+        my $temp_kerbDist = undef;
+        if($samplingPoint{stationClassification} eq 'traffic'){
+            $temp_buildingDist = $gen->buildingDistance([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"], {'uom' => "http://dd.eionet.europa.eu/vocabulary/uom/length/m"}, sprintf("%.1f", 999));
+            $temp_kerbDist = $gen->kerbDistance([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"], {'uom' => "http://dd.eionet.europa.eu/vocabulary/uom/length/m"}, sprintf("%.1f",999))
+        }
+
+
         my $feauture_SAM = $gen->featureMember(
                                 $gen->AQD_Sample([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"],
                                     {'gml:id' => "SAM.".$formatted_code},
@@ -631,8 +680,8 @@ foreach my $key (sort { $a <=> $b } keys %networks){
                                     $shape_SAM,
                                     $inspireId_feauture_SAM,
                                     $gen->inletHeight([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"], {'uom' => "http://dd.eionet.europa.eu/vocabulary/uom/length/m"}, sprintf("%.1f", $samplingPoint{inletHeight})),
-                                    defined $samplingPoint{buildingDist} ? $gen->buildingDistance([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"], {'uom' => "http://dd.eionet.europa.eu/vocabulary/uom/length/m"}, sprintf("%.1f",$samplingPoint{buildingDist})) : undef,
-                                    defined $samplingPoint{kerbDist}     ? $gen->kerbDistance([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"], {'uom' => "http://dd.eionet.europa.eu/vocabulary/uom/length/m"}, sprintf("%.1f",$samplingPoint{kerbDist})) : undef
+                                    defined $samplingPoint{buildingDist} ? $gen->buildingDistance([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"], {'uom' => "http://dd.eionet.europa.eu/vocabulary/uom/length/m"}, sprintf("%.1f",$samplingPoint{buildingDist})) : $temp_buildingDist,
+                                    defined $samplingPoint{kerbDist}     ? $gen->kerbDistance([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"], {'uom' => "http://dd.eionet.europa.eu/vocabulary/uom/length/m"}, sprintf("%.1f",$samplingPoint{kerbDist})) : $temp_kerbDist
                                 )
                             );
 
@@ -731,7 +780,7 @@ foreach my $key (sort { $a <=> $b } keys %networks){
                                     $gen->mobile([ef      =>  "http://inspire.ec.europa.eu/schemas/ef/3.0"], 'false'),
                                     $operationalActivityPeriod_SPO,
                                     $gen->belongsTo([ef      =>  "http://inspire.ec.europa.eu/schemas/ef/3.0"], {'xlink:href' => "IT.ISPRA.AQD/NET.".$network{zoneID}}),
-                                    $gen->assessmentType([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"], {'xlink:href' => "http://dd.eionet.europa.eu/vocabulary/aq/assessmenttype/fixed"}), #$samplingPoint{assessmentType}}
+                                    $gen->assessmentType([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"], {'xlink:href' => "http://dd.eionet.europa.eu/vocabulary/aq/assessmenttype/".$samplingPoint{assessmentType}}), #fixed, indicative, model ecc ecc
                                     $gen->relevantEmissions([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"],
                                         $gen->RelevantEmissions([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"],
                                             # $gen->distanceSource([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"], {'uom' => "http://dd.eionet.europa.eu/vocabulary/uom/length/m"}, 150.0),
@@ -744,6 +793,7 @@ foreach my $key (sort { $a <=> $b } keys %networks){
                                     ),
                                     $gen->usedAQD([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"], $samplingPoint{usedAQD}),
                                     @environmentalObjectives_array,
+                                    defined $samplingPoint{changeAEIStations} ? $gen->changeAEIStations([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"], $samplingPoint{changeAEIStations}) : undef,
                                     $gen->reportingDB([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"], {'xlink:href' => "http://dd.eionet.europa.eu/vocabulary/aq/reportinglevel/national"}),
                                     $gen->reportingDBOther([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"]),
                                     $samplingPoint{usedAQD} eq 'true' ? $gen->zone([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"], {'xlink:href' => 'IT.ISPRA.AQD/ZON.'.$samplingPoint{zone}}) : undef
@@ -796,15 +846,19 @@ foreach my $key (sort { $a <=> $b } keys %networks){
                     )
                 );
 
-            my $samplingEquipment_SPP = $gen->samplingEquipment([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"],
-                    $gen->SamplingEquipment([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"],
-                        $gen->equipment([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"], {'xlink:href' => "http://dd.eionet.europa.eu/vocabulary/aq/samplingequipment/".$samplingPoint{samplingEquipment}})
-                    )
-                );
+            if (defined $samplingPoint{samplingEquipment}){
+                my $samplingEquipment_SPP = $gen->samplingEquipment([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"],
+                        $gen->SamplingEquipment([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"],
+                            $gen->equipment([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"], {'xlink:href' => "http://dd.eionet.europa.eu/vocabulary/aq/samplingequipment/".$samplingPoint{samplingEquipment}})
+                        )
+                    );
+
+                push @array_objects_measurement_SPP, $samplingEquipment_SPP;
+            }
 
             push @array_objects_measurement_SPP, $samplingMethod_SPP;
             push @array_objects_measurement_SPP, $analyticalTechnique_SPP;
-            push @array_objects_measurement_SPP, $samplingEquipment_SPP;
+
         }
 
         my $equivalence;
@@ -866,7 +920,7 @@ foreach my $key (sort { $a <=> $b } keys %networks){
                                                     # )
                                                 # )
                                             ),
-                                            $contact
+                                            $contact_Header
                                         )
                                     ),
                                     $gen->measurementType([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"], {'xlink:href' => "http://dd.eionet.europa.eu/vocabulary/aq/measurementtype/".$samplingPoint{measurementType}}),
@@ -905,9 +959,9 @@ foreach my $key (sort { $a <=> $b } keys %networks){
 # CREAZIONE REPORTING HEADER
 
 my $reportingHeader = $gen->AQD_ReportingHeader([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"],
-                        {'gml:id' => "RHE.IT.Dataset.D.2018"},
+                        {'gml:id' => "RHE.IT.Dataset.D.".$version_year},
                         $gen->change([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"], $dataHeader{change}),
-                        $gen->changeDescription([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"], $dataHeader{changeDescription}),
+                        $gen->changeDescription([aqd     =>  "http://dd.eionet.europa.eu/schemaset/id2011850eu-1.0"], $dataHeader{changeDescription}.' update submission '.$year),
                         $inspireId_Header,
                         $reportingAuthority_Header,
                         $reportingPeriod_Header,
@@ -956,6 +1010,17 @@ print ("\nFine script.\n");
 # aqd:reportingPeriod                       Mandatory
 # aqd:content                               Voluntary (M if aqd:change=”True”)
 
+# aqd:Network includes:
+# ef:inspireId                              Mandatory (D.5.3.1)
+# ef:name                                   Mandatory for e-Reporting (D.5.3.2)
+# aqd:networkType                           Voluntary (D.5.3.3)
+# aqd:operationalActivityPeriod             Mandatory (D.5.3.4)
+# aqd:aggregationTimeZone                   Mandatory (D.5.3.5)
+# ef:responsibleParty                       Mandatory (D.5.3.6)
+# ef:mediaMonitored                         Mandatory (D.5.3.7)
+# ef:organisationalLevel                    Mandatory (D.5.3.8)
+
+
 # aqd:Station includes:
 # ef:inspireId                              Mandatory (D.5.2.1)
 # aqd:natlStationCode                       Mandatory (D.5.2.2)
@@ -987,7 +1052,7 @@ print ("\nFine script.\n");
 # ef:inspireId                              Mandatory (D.5.1.1)
 # ef:ResponsibleParty                       Conditional, mandatory if different from D.2 (D.4.1)
 # aqd:assessmentType                        Mandatory (D.4.2)
-# ! aqd:zone                                  Mandatory if used for AQD (D.4.3)
+# aqd:zone                                  Mandatory if used for AQD (D.4.3)
 # ef:broader                                Mandatory (D.5.1.2)
 # ef:belongsTo                              Mandatory (D.5.1.3)
 # ef:operationalActivityPeriod              Important Mandatory (D.5.1.4)
@@ -1006,7 +1071,7 @@ print ("\nFine script.\n");
     # ef:processType                            Mandatory (D.5.1.14)
 # ! sam:sampledFeature                        Mandatory (D.5.1.7.2) – see aqd:AQD_RepresentativeArea
 # aqd:usedAQD                               Mandatory (D.5.1.8)
-# ! aqd:environmentalObjective                Mandatory (D.5.1.9)
+# aqd:environmentalObjective                Mandatory (D.5.1.9) se usedAQD = true
 # aqd:changeAEIStations                     C, Mandatory (D.5.1.10) if AEI “stations” have been relocated
 # ef:mediaMonitored                         Mandatory (D.5.1.11)
 # ef:measurementRegime                      Mandatory (D.5.1.12)

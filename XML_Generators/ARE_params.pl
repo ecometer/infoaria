@@ -1,3 +1,17 @@
+#!/usr/bin/perl
+# ----------------------_-------------------------------------------
+#  ___ __ ___ _ __  ___| |_ ___ _ _
+# / -_) _/ _ \ '  \/ -_)  _/ -_) '_|
+# \___\__\___/_|_|_\___|\__\___|_|   s.n.c.
+#
+#  Script     : ARE_params.pl
+#  Author     : Paolo Saudin & Hillary Martello
+#  Date       : 2018-03-28
+#  Last Edited: 2018-05-31
+#  Description: Data input to create XML for InfoAria DATASETS
+#  Location   : Arpa vda
+# ------------------------------------------------------------------
+
 our %ARE_elements = (
             IT0204_5012_H_LV_aMean_2017_retro => {
             SPO => {

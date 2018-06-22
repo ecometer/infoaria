@@ -4,7 +4,7 @@
 # / -_) _/ _ \ '  \/ -_)  _/ -_) '_|
 # \___\__\___/_|_|_\___|\__\___|_|   s.n.c.
 #
-#  Script     : params_config.pl
+#  Script     : CAU_params.pl
 #  Author     : Paolo Saudin & Hillary Martello
 #  Date       : 2018-03-28
 #  Last Edited: 2018-05-31
